@@ -78,6 +78,13 @@ public class Constants {
      */
     public static final String ENV_FORMAT = "env";
 
+    /**
+     * Path to the directory where extracted files will be saved.
+     * This folder is created if it does not exist.
+     */
+    public static final String OUTPUT_DIRECTORY = "./output";
+
+
     // Prevent instantiation
     private Constants() {}
 }

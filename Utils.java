@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utility class for processing structured data files in a custom archival format.
@@ -27,6 +29,8 @@ public class Utils {
 
     }
 
+    private static final List<String> files = new ArrayList<String>();
+    
     /**
      * Processes the given archival input file by parsing its structure,
      * identifying individual embedded files, and saving them to the <code>./output</code> directory.
@@ -39,7 +43,7 @@ public class Utils {
      * @throws RuntimeException if the file cannot be read or processed
      */
     public static void processFile(String fileName) {
-        Path outputDir = Path.of("output");
+        Path outputDir = Path.of(Constants.OUTPUT_DIRECTORY);
 
         createDirectory(outputDir);
 
@@ -57,8 +61,9 @@ public class Utils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        
         System.out.println("Content saved into ./output directory");
+        printMetadata(files);
     }
 
     /**
@@ -137,6 +142,8 @@ public class Utils {
             offset = findHeaderOcurrence(offset, Constants.FILENAME_HEADER, data);
             String filename = getHeaderValue("Filename", offset + Constants.FILENAME_HEADER_LEN, data);
 
+            files.add(filename);
+
             offset = findHeaderOcurrence(offset, Constants.SECTION_START_DATA, data);
             offset = offset + Constants.SECTION_START_DATA_LEN - 1;
 
@@ -187,8 +194,6 @@ public class Utils {
             Path path = outputDir.resolve(filename);
 
             writeContent(path, content, extension);
-
-            printMetadata(filename, content.length);
         }
 
         return nextStartingPoint;
@@ -222,21 +227,24 @@ public class Utils {
 
 
     /**
-     * Prints basic metadata information about a file extracted from the input archive.
+     * Prints a simple file tree structure of the extracted files inside the output directory.
      *
-     * The output includes the file name and the size of its content in bytes.
+     * The output is formatted to visually represent the list of files stored in the "./output" folder.
+     * Each file is printed with a tree-like prefix.
      *
-     * @param filename the name of the extracted file
-     * @param dataLen the length of the file content in bytes
+     * Example:
+     * output/
+     * ├── file1.txt
+     * ├── image.jpg
+     * └── document.xml
+     *
+     * @param files a list of extracted filenames to display
      */
-    private static void printMetadata(String filename, int dataLen) {
-        StringBuilder sb = new StringBuilder("Filename: ")
-                    .append(filename)
-                    .append(". Size: ")
-                    .append(dataLen)
-                    .append(" bytes.");
-
-        System.out.println(sb.toString());
+    private static void printMetadata(List<String> files) {
+            System.out.println("output/");
+            for (String file : files) {
+                System.out.println("├── " + file);
+        }
     }
 
 
