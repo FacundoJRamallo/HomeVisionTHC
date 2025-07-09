@@ -39,16 +39,20 @@ public class Utils {
      * @throws RuntimeException if the file cannot be read or processed
      */
     public static void processFile(String fileName) {
-        File file = new File("sample.env");
+        Path outputDir = Path.of("output");
+
+        createDirectory(outputDir);
+
+        File file = new File(fileName);
 
         try (InputStream input = new FileInputStream(file)) {
 
-            byte[] data = Utils.readFileContent(input);
+            byte[] data = readFileContent(input);
 
-            int offset = Utils.findHeaderOcurrence(0, Constants.SECTION_MARKER, data);
+            int offset = findHeaderOcurrence(0, Constants.SECTION_MARKER, data);
 
             while(offset < data.length) {
-                offset = Utils.processFilesData(offset, data);
+                offset = processFilesData(offset, data, outputDir);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -121,9 +125,10 @@ public class Utils {
      *
      * @param offset the offset where the current file block begins
      * @param data the complete data buffer
+     * @param outputDir directory where the files should be placed
      * @return the offset of the next file block (or end of buffer if none)
      */
-    public static int processFilesData(int offset, byte[] data) {
+    public static int processFilesData(int offset, byte[] data, Path outputDir) {
         if (offset > 0) {
 
             offset = findHeaderOcurrence(offset, Constants.EXTENSION_HEADER, data);
@@ -135,12 +140,8 @@ public class Utils {
             offset = findHeaderOcurrence(offset, Constants.SECTION_START_DATA, data);
             offset = offset + Constants.SECTION_START_DATA_LEN - 1;
 
-            try {
-                offset = saveContent(offset, data, filename, extension);
-            } catch (IOException e) {
-                System.out.println("Error saving file: " + filename);   
-            }
-        }
+            offset = saveContent(offset, data, filename, extension, outputDir);
+          }
 
         return offset;
     }
@@ -173,26 +174,19 @@ public class Utils {
      * @param data the full data buffer
      * @param filename the name of the output file (with extension)
      * @param extension the file extension used to determine text/binary format
+     * @param outputDir directory where the files should be placed
      * @return the offset of the next header after this file
      * @throws IOException if an error occurs while saving the file
      */
-    private static int saveContent(int offset,  byte[] data, String filename, String extension) throws IOException {
+    private static int saveContent(int offset,  byte[] data, String filename, String extension, Path outputDir) {
         int nextStartingPoint = findHeaderOcurrence(offset, Constants.SECTION_MARKER, data);
     
         if (nextStartingPoint > 0) {
             byte[] content = Arrays.copyOfRange(data, offset + Constants.TRASH_BYTES_AFTER_META, nextStartingPoint);
 
-            Path outputDir = Path.of("output");
-            Files.createDirectories(outputDir);
-
             Path path = outputDir.resolve(filename);
 
-            if (isTextual(extension)){
-                String contentFormatted = new String(content, StandardCharsets.UTF_8);
-                Files.writeString(path, contentFormatted, StandardCharsets.UTF_8);
-            } else {
-                Files.write(path, content);
-            }
+            writeContent(path, content, extension);
 
             printMetadata(filename, content.length);
         }
@@ -244,5 +238,49 @@ public class Utils {
 
         System.out.println(sb.toString());
     }
-    
+
+
+    /**
+     * Ensures that the specified directory exists by creating it if necessary.
+     * 
+     * If the directory (or any necessary parent directories) cannot be created due to an I/O error,
+     * the method prints an error message and terminates the program.
+     *
+     * @param outputDir The path of the directory to create.
+     */
+    private static void createDirectory(Path outputDir) {
+        try {
+            Files.createDirectories(outputDir);
+        } catch (IOException e) {
+            System.err.println("Error: Could not create output directory " + outputDir);
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Writes the given content to a specified file path, handling both text and binary formats.
+     * 
+     * If the file extension indicates a textual format (such as XML, TXT, etc.), the content is
+     * interpreted as UTF-8 encoded text. Otherwise, it is written as raw binary.
+     * 
+     * In case of an I/O error during the writing process, the method logs the error and terminates
+     * the program.
+     *
+     * @param path      The destination file path where the content will be written.
+     * @param content   The file content as a byte array.
+     * @param extension The file extension (used to determine whether the content is textual or binary).
+     */
+    private static void writeContent(Path path, byte[] content, String extension) {
+        try {
+            if (isTextual(extension)){
+                String contentFormatted = new String(content, StandardCharsets.UTF_8);
+                Files.writeString(path, contentFormatted, StandardCharsets.UTF_8);
+            } else {
+                Files.write(path, content);
+            }
+        } catch (IOException e) {
+            System.err.println("Error: Failed to write file -> " + path);
+            System.exit(1);
+        }
+    }
 }

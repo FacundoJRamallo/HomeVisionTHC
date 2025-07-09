@@ -67,6 +67,17 @@ public class Constants {
      */
     public static final int TRASH_BYTES_AFTER_META = 5;
     
+    /**
+     * Marker used to represent the dot (.) character, typically used in file extensions.
+     */
+    public static final String DOT_MARKER = ".";
+
+    /**
+     * Expected file extension for input files processed by this program.
+     * Files must have the "env" extension to be considered valid input.
+     */
+    public static final String ENV_FORMAT = "env";
+
     // Prevent instantiation
     private Constants() {}
 }
