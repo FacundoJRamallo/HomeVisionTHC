@@ -14,7 +14,7 @@ The `.env` file is a binary container with custom delimiters marking each metada
 - `FileParser.java`: The entry point. Validates input, handles errors, and coordinates the file parsing process.
 - `Utils.java`: Contains core logic for parsing, interpreting headers, and saving extracted files.
 - `Constants.java`: Stores byte-level markers and format-specific constants for parsing.
-- `project.sh`: Bash script to **build**, **run**, and **clean** the project.
+- `fileParser.sh`: Bash script to **build**, **run**, and **clean** the project.
 
 ---
 
@@ -27,19 +27,19 @@ Open a terminal in the root project directory
 - Build:
 
 ```bash
-./project.sh build
+./fileParser.sh build
 ```
 
 - Run the parser:
 
 ```bash
-./project.sh run sample.env
+./fileParser.sh run sample.env
 ```
 
 - Clean:
 
 ```bash
-./project.sh clean
+./fileParser.sh clean
 ```
 
 ## Output
@@ -69,3 +69,8 @@ output/
 |   content.txt
 ```
 
+## Live Demo
+
+This project runs locally as a console application and does not include a hosted or web-based demo.
+
+To try it out, clone the repository and follow the [Usage](#-how-to-use) instructions.

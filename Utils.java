@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -58,8 +59,10 @@ public class Utils {
             while(offset < data.length) {
                 offset = processFilesData(offset, data, outputDir);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            handleError(ErrorMessageEnum.FILE_NOT_FOUND_ERROR.message(file.getName()));;
+        } catch (IOException ex) {
+            handleError(ErrorMessageEnum.WRITE_TO_FILE_ERROR.message(file.getName()));
         }
         
         System.out.println("Content saved into ./output directory");
@@ -260,8 +263,7 @@ public class Utils {
         try {
             Files.createDirectories(outputDir);
         } catch (IOException e) {
-            System.err.println("Error: Could not create output directory " + outputDir);
-            System.exit(1);
+            handleError(ErrorMessageEnum.DIRECTORY_CREATE_ERROR.message(outputDir.toString()));
         }
     }
 
@@ -287,8 +289,12 @@ public class Utils {
                 Files.write(path, content);
             }
         } catch (IOException e) {
-            System.err.println("Error: Failed to write file -> " + path);
-            System.exit(1);
+            handleError(ErrorMessageEnum.WRITE_TO_FILE_ERROR.message(path.toString()));
         }
+    }
+
+    private static void handleError(String msg) {
+        System.err.println(msg);
+        System.exit(1);
     }
 }
