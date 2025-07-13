@@ -52,6 +52,10 @@ public class Utils {
     public static void processFile(String fileName) throws FileParsingException {
         File file = new File(fileName);
 
+        if (file.length() == 0) {
+            throw new InvalidFormatException(ErrorMessageEnum.EMPTY_FILE_ERROR, fileName);
+        }
+
         try (InputStream input = new FileInputStream(file)) {
 
             byte[] data = readFileContent(input);

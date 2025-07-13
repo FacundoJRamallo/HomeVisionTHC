@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -34,9 +33,7 @@ public class FileParser {
     
     public static void main(String[] args) {
         
-        validateArgs(args);
-
-        String fileName = args[0];
+        String fileName = validateAndRetrieveFileNameAegument(args);
 
         validateFile(fileName);
 
@@ -57,7 +54,7 @@ public class FileParser {
      *
      * @param args the array of command-line arguments passed to the program
      */
-    private static void validateArgs(String[] args) {
+    private static String validateAndRetrieveFileNameAegument(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: java FileParser <inputfile>.env");
             System.exit(1);
@@ -69,6 +66,8 @@ public class FileParser {
             System.out.println("Invalid format type. The extension should be \"" + Constants.ENV_FORMAT + "\"");
             System.exit(1);
         }
+
+        return fileName;
     }
 
     /**
