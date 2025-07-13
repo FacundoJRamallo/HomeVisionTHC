@@ -29,7 +29,6 @@ function clean() {
     rm -rf "$OUT_DIR"
     find . -name $JAVA_CLASS -delete
 
-    rm $TMP_SOURCES_FILE
     echo "Clean complete."
 }
 
@@ -37,6 +36,13 @@ function run() {
     if [ -z "$2" ]; then
         echo "Usage: ./project.sh run <inputfile>"
         exit 1
+    fi
+
+    INPUT_FILE="$2"
+
+    if [ ! -f "$INPUT_FILE" ]; then
+        echo "Error: File '$INPUT_FILE' does not exist."
+        return 1
     fi
 
     echo "Running parser for file: $2"

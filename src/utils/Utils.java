@@ -52,7 +52,7 @@ public class Utils {
     }
 
     private static final List<String> files = new ArrayList<String>();
-    
+
     /**
      * Parses a custom-structured binary file and extracts embedded content blocks.
      * <p>
@@ -69,11 +69,8 @@ public class Utils {
      * @throws FileParsingException if the file cannot be read or is invalid
      */
     public static void processFile(String fileName) throws FileParsingException {
-        File file = new File(fileName);
-
-        if (file.length() == 0) {
-            throw new InvalidFormatException(ErrorMessageEnum.EMPTY_FILE_ERROR, fileName);
-        }
+        
+        File file = validateFile(fileName);
 
         try (InputStream input = new FileInputStream(file)) {
 
@@ -99,6 +96,38 @@ public class Utils {
         
         System.out.println(String.format("Content saved into %s directory", Constants.OUTPUT_DIRECTORY));
         printMetadata(files);
+    }
+
+    /**
+     * Validates the existence, readability, and non-emptiness of a file given its filename.
+     *
+     * <p>This method checks if the file exists and can be read. It also verifies that the
+     * file is not empty (i.e., its length is greater than zero).</p>
+     *
+     * <p>If any of these validations fail, it throws a specific {@link FileParsingException} subclass
+     * indicating the error:
+     * <ul>
+     *   <li>{@link FileMissingException} if the file is missing or not readable.</li>
+     *   <li>{@link InvalidFormatException} if the file is empty.</li>
+     * </ul>
+     * </p>
+     *
+     * @param fileName the path or name of the file to validate
+     * @return a validated {@link File} object representing the file
+     * @throws FileParsingException if the file does not exist, is not readable, or is empty
+     */
+    private static File validateFile(String fileName) throws FileParsingException{
+        File file = new File(fileName);
+
+        if (!file.exists() || !file.canRead()) {
+            throw new FileMissingException(fileName);
+        }
+
+        if (file.length() == 0) {
+            throw new InvalidFormatException(ErrorMessageEnum.EMPTY_FILE_ERROR, fileName);
+        }
+
+        return file;
     }
 
     /**
