@@ -1,3 +1,4 @@
+package utils;
 /**
  * Defines constants used to parse and extract data from a custom archival file format.
  * <p>

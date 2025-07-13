@@ -1,3 +1,4 @@
+package utils;
 /**
  * Enumeration of predefined error message templates used across the application.
  * <p>
@@ -7,9 +8,9 @@
  */
 public enum ErrorMessageEnum {
     /**
-     * Error message shown when a file cannot be written.
+     * Error message shown when a file cannot be written/read.
      */
-    WRITE_TO_FILE_ERROR("Error: Failed to write file -> %s"),
+    READ_WRITE_FILE_ERROR("Error: read/write error processing file -> %s"),
 
     /**
      * Error message shown when the output directory could not be created.
@@ -19,7 +20,17 @@ public enum ErrorMessageEnum {
     /**
      * Error message shown when the input file does not exist.
      */
-    FILE_NOT_FOUND_ERROR("Error: File not found -> %s");
+    FILE_NOT_FOUND_ERROR("Error: File not found -> %s"),
+
+    /**
+     * Error message shown when the input file format is invalid.
+     */
+    INVALID_FORMAT_ERROR("Error: Invalid format -> %s"),
+
+    /**
+     * Error message shown when the input file is empty.
+     */
+    EMPTY_FILE_ERROR("Error: Empty file -> %s");
 
     private String message;
 

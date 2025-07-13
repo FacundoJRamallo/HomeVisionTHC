@@ -1,3 +1,4 @@
+package utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,6 +10,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import exceptions.FileIOException;
+import exceptions.FileMissingException;
+import exceptions.FileParsingException;
+import exceptions.InvalidFormatException;
 
 /**
  * Utility class for processing structured data files in a custom archival format.
@@ -43,11 +49,7 @@ public class Utils {
      * @param fileName the name of the file to be processed
      * @throws RuntimeException if the file cannot be read or processed
      */
-    public static void processFile(String fileName) {
-        Path outputDir = Path.of(Constants.OUTPUT_DIRECTORY);
-
-        createDirectory(outputDir);
-
+    public static void processFile(String fileName) throws FileParsingException {
         File file = new File(fileName);
 
         try (InputStream input = new FileInputStream(file)) {
@@ -56,16 +58,23 @@ public class Utils {
 
             int offset = findHeaderOcurrence(0, Constants.SECTION_MARKER, data);
 
+            if (offset >= data.length) {
+                throw new InvalidFormatException(ErrorMessageEnum.EMPTY_FILE_ERROR, fileName);
+            }
+
+            Path outputDir = Path.of(Constants.OUTPUT_DIRECTORY);
+            createDirectory(outputDir);
+
             while(offset < data.length) {
                 offset = processFilesData(offset, data, outputDir);
             }
         } catch (FileNotFoundException e) {
-            handleError(ErrorMessageEnum.FILE_NOT_FOUND_ERROR.message(file.getName()));;
+            throw new FileMissingException(file.getName());
         } catch (IOException ex) {
-            handleError(ErrorMessageEnum.WRITE_TO_FILE_ERROR.message(file.getName()));
+            throw new FileIOException(ErrorMessageEnum.READ_WRITE_FILE_ERROR, file.getName(), ex);
         }
         
-        System.out.println("Content saved into ./output directory");
+        System.out.println(String.format("Content saved into %s directory", Constants.OUTPUT_DIRECTORY));
         printMetadata(files);
     }
 
@@ -244,7 +253,7 @@ public class Utils {
      * @param files a list of extracted filenames to display
      */
     private static void printMetadata(List<String> files) {
-            System.out.println("output/");
+            System.out.println(Constants.OUTPUT_DIRECTORY + "/");
             for (String file : files) {
                 System.out.println("├── " + file);
         }
@@ -263,7 +272,7 @@ public class Utils {
         try {
             Files.createDirectories(outputDir);
         } catch (IOException e) {
-            handleError(ErrorMessageEnum.DIRECTORY_CREATE_ERROR.message(outputDir.toString()));
+            throw new FileIOException(ErrorMessageEnum.DIRECTORY_CREATE_ERROR, outputDir.toString(), e);
         }
     }
 
@@ -289,12 +298,7 @@ public class Utils {
                 Files.write(path, content);
             }
         } catch (IOException e) {
-            handleError(ErrorMessageEnum.WRITE_TO_FILE_ERROR.message(path.toString()));
+            throw new FileIOException(ErrorMessageEnum.DIRECTORY_CREATE_ERROR, path.toString(), e);
         }
-    }
-
-    private static void handleError(String msg) {
-        System.err.println(msg);
-        System.exit(1);
     }
 }

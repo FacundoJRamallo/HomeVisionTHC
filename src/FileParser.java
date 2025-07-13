@@ -1,5 +1,10 @@
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import exceptions.FileParsingException;
+import utils.Constants;
+import utils.Utils;
 
 /**
  * Entry point of the archival file parser application.
@@ -35,7 +40,13 @@ public class FileParser {
 
         validateFile(fileName);
 
-        Utils.processFile(fileName);
+        try {
+            Utils.processFile(fileName);
+        }
+        catch (FileParsingException e) {
+            System.err.println("Parser error: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     /**
