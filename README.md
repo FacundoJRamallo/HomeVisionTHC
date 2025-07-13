@@ -75,7 +75,7 @@ Clone the repository and open a terminal in the root directory.
 ./fileParser.sh build
 ```
 
-- Run the parser::
+- Run the parser:
 
 ```bash
 ./fileParser.sh run sample.env
