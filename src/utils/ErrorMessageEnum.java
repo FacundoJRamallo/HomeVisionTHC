@@ -1,10 +1,12 @@
 package utils;
+
 /**
- * Enumeration of predefined error message templates used across the application.
+ * Enumeration of standardized error message templates used throughout the application.
  * <p>
- * Each enum constant holds a message template that may contain placeholders (e.g., {@code %s})
- * to be formatted dynamically at runtime.
- * <p>
+ * Each constant defines a human-readable message format, which may include
+ * placeholders (e.g., {@code %s}) to be dynamically populated at runtime.
+ * These messages help ensure consistency across exceptions and error reporting.
+ * </p>
  */
 public enum ErrorMessageEnum {
     /**
@@ -32,7 +34,7 @@ public enum ErrorMessageEnum {
      */
     EMPTY_FILE_ERROR("Error: Empty file -> %s");
 
-    private String message;
+    private final String message;
 
     ErrorMessageEnum(String message) {
         this.message = message;

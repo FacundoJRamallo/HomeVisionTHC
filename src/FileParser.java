@@ -33,7 +33,7 @@ public class FileParser {
     
     public static void main(String[] args) {
         
-        String fileName = validateAndRetrieveFileNameAegument(args);
+        String fileName = validateAndRetrieveFileNameArgument(args);
 
         validateFile(fileName);
 
@@ -47,14 +47,15 @@ public class FileParser {
     }
 
     /**
-     * Validates that the program was executed with at least one command-line argument.
-     * 
-     * If no arguments are provided, prints a usage message and terminates the program
-     * with a non-zero exit code.
+     * Validates that at least one command-line argument is provided and that it matches
+     * the expected input format (e.g., ".env").
+     * <p>
+     * If the validation fails, an error message is printed and the program exits.
      *
-     * @param args the array of command-line arguments passed to the program
+     * @param args the command-line arguments
+     * @return the input file name extracted from the arguments
      */
-    private static String validateAndRetrieveFileNameAegument(String[] args) {
+    private static String validateAndRetrieveFileNameArgument(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: java FileParser <inputfile>.env");
             System.exit(1);
@@ -71,12 +72,11 @@ public class FileParser {
     }
 
     /**
-     * Checks that the specified file exists in the file system.
-     * 
-     * If the file does not exist, prints an error message and terminates the program
-     * with a non-zero exit code.
+     * Verifies that the input file exists in the file system.
+     * <p>
+     * If the file does not exist, an error message is printed and the application exits.
      *
-     * @param fileName the name (or path) of the input file to validate
+     * @param fileName the name or path of the input file to validate
      */
     private static void validateFile(String fileName) {
         Path inputFile = Path.of(fileName);
@@ -88,13 +88,13 @@ public class FileParser {
     }
 
     /**
-     * Checks if a given filename ends with a dot followed by the specified format (extension).
+     * Checks if the given file name ends with the specified format (extension).
+     * <p>
+     * This method does a basic suffix check using the dot marker.
      *
-     * Eg.: "<fileName>.env"
-     *  
-     * @param name   The filename to check.
-     * @param format The expected file extension, without the dot (e.g. "env").
-     * @return true if the filename has the correct extension; false otherwise.
+     * @param name   the file name to check
+     * @param format the expected extension (e.g., {@code "env"}), without the dot
+     * @return {@code true} if the file name ends with the given format; {@code false} otherwise
      */
     private static boolean isValidFormat(String name, String format) {
         return name != null && format != null 

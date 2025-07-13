@@ -17,13 +17,28 @@ import exceptions.FileParsingException;
 import exceptions.InvalidFormatException;
 
 /**
- * Utility class for processing structured data files in a custom archival format.
+ * Utility class for processing structured archive-like data files containing embedded files.
  * <p>
- * This class provides static methods to parse a bundled file, extract individual file
- * sections based on byte-level headers, and save them as separate output files.
+ * This class provides static methods to parse a specially structured binary input file,
+ * extract individual file sections based on header markers, and save them into an output directory.
  * </p>
  * <p>
- * The output files are written to the <code>./output</code> directory.
+ * Each embedded file block is identified by a set of markers (headers and metadata), and is
+ * extracted either as plain text or raw binary, depending on its extension.
+ * Extracted files are saved into the {@code ./output} directory by default.
+ * </p>
+ * 
+ * <h2>Example flow:</h2>
+ * <ul>
+ *   <li>Open and read a binary file.</li>
+ *   <li>Search for section headers that identify embedded files.</li>
+ *   <li>Extract metadata (filename, extension) and content for each block.</li>
+ *   <li>Write the content to disk using proper format detection.</li>
+ * </ul>
+ * 
+ * <p>
+ * This class throws specialized exceptions (such as {@link FileIOException}, {@link FileMissingException},
+ * {@link InvalidFormatException}) when parsing fails, to allow better error handling.
  * </p>
  */
 public class Utils {
@@ -39,15 +54,19 @@ public class Utils {
     private static final List<String> files = new ArrayList<String>();
     
     /**
-     * Processes the given archival input file by parsing its structure,
-     * identifying individual embedded files, and saving them to the <code>./output</code> directory.
+     * Parses a custom-structured binary file and extracts embedded content blocks.
+     * <p>
+     * The method identifies embedded files by looking for section headers,
+     * then delegates extraction and saving logic to helper methods.
+     * </p>
+     * <p>
+     * If the file is empty or the expected section marker is missing, an
+     * {@link InvalidFormatException} is thrown. The output directory is created
+     * only after validation passes.
+     * </p>
      *
-     * This method expects the input file to contain one or more sections, each preceded by a
-     * known header marker. The method reads the full file into memory, identifies each embedded
-     * file (based on markers and metadata), and delegates extraction and saving to other helpers.
-     *
-     * @param fileName the name of the file to be processed
-     * @throws RuntimeException if the file cannot be read or processed
+     * @param fileName the path to the input file
+     * @throws FileParsingException if the file cannot be read or is invalid
      */
     public static void processFile(String fileName) throws FileParsingException {
         File file = new File(fileName);
@@ -83,10 +102,10 @@ public class Utils {
     }
 
     /**
-     * Reads all bytes from the given InputStream.
+     * Reads all bytes from an input stream.
      *
      * @param input the input stream to read from
-     * @return a byte array containing the entire content of the stream
+     * @return the full byte array read from the stream
      * @throws IOException if an I/O error occurs
      */
     public static byte[] readFileContent(InputStream input) throws IOException {
@@ -141,13 +160,16 @@ public class Utils {
 
 
     /**
-     * Processes a single logical file block starting at the given offset by locating
-     * metadata headers and extracting the file content.
+     * Parses and extracts a single embedded file section starting at the given offset.
+     * <p>
+     * It locates the extension, filename, and content markers, and then delegates
+     * writing the extracted content to the output directory.
+     * </p>
      *
-     * @param offset the offset where the current file block begins
-     * @param data the complete data buffer
-     * @param outputDir directory where the files should be placed
-     * @return the offset of the next file block (or end of buffer if none)
+     * @param offset    the starting offset in the data buffer
+     * @param data      the complete file data buffer
+     * @param outputDir the directory where extracted files will be saved
+     * @return the updated offset pointing to the next file section (or end of buffer)
      */
     public static int processFilesData(int offset, byte[] data, Path outputDir) {
         if (offset > 0) {
@@ -171,12 +193,12 @@ public class Utils {
 
 
     /**
-     * Finds the first occurrence of a given header pattern in the data starting from a position.
+     * Searches the data buffer for the first occurrence of a specific byte header starting at a given offset.
      *
-     * @param pos the starting offset for the search
-     * @param header the byte sequence to match
-     * @param data the data array to search within
-     * @return the offset of the first match found, or the data length if not found
+     * @param pos    the starting offset for the search
+     * @param header the byte pattern to search for
+     * @param data   the data buffer
+     * @return the offset where the header is found, or the buffer length if not found
      */
     public static int findHeaderOcurrence(int pos, byte[] header, byte[] data) {
 
@@ -302,7 +324,7 @@ public class Utils {
                 Files.write(path, content);
             }
         } catch (IOException e) {
-            throw new FileIOException(ErrorMessageEnum.DIRECTORY_CREATE_ERROR, path.toString(), e);
+            throw new FileIOException(ErrorMessageEnum.READ_WRITE_FILE_ERROR, path.toString(), e);
         }
     }
 }

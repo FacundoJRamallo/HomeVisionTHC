@@ -3,61 +3,40 @@ HomeVision Take-home Challenge for Silver.dev
 
 # FileParser
 
-**FileParser** is a Java utility that analyzes a proprietary `.env` archival file format, extracts embedded files (such as `.jpg`, `.xml`, `.txt`, etc.), and saves them into the `./output` directory.
+**FileParser** is a Java command-line tool designed to parse a proprietary binary `.env` file format.  
+It extracts embedded files (such as `.jpg`, `.xml`, `.txt`, etc.) and saves them into the `./output` directory.
 
-The `.env` file is a binary container with custom delimiters marking each metadata and content section. This parser was built using reverse engineering techniques.
-
----
-
-## Project Structure
-
-- `FileParser.java`: The entry point. Validates input, handles errors, and coordinates the file parsing process.
-- `Utils.java`: Contains core logic for parsing, interpreting headers, and saving extracted files.
-- `Constants.java`: Stores byte-level markers and format-specific constants for parsing.
-- `fileParser.sh`: Bash script to **build**, **run**, and **clean** the project.
+The `.env` file is a custom container with byte-level headers that mark each file’s metadata and content block.  
+This parser was developed using **reverse engineering** techniques based on structured patterns.
 
 ---
 
-## How to Use
+## What This Project Does
 
-Open a terminal in the root project directory
+This project provides a utility for **unpacking binary archives** that contain multiple embedded files, commonly used in:
+- Internal data interchange formats
+- Backups or configuration bundles
+- Exported data dumps with metadata-annotated files
 
-### Available commands
+The parser:
+- Reads and decodes structured sections marked by binary headers
+- Extracts the original filenames and file extensions
+- Writes each file to the local `./output/` directory
 
-- Build:
+---
 
-```bash
-./fileParser.sh build
-```
+## Example
 
-- Run the parser:
+If a file called `sample.env` contains six embedded files:
 
-```bash
-./fileParser.sh run sample.env
-```
+- `homer-simpson.jpg`
+- `0-INC2.xml`
+- `1004UADMISMOUAD2.6GSE.xml`
+- `1-REO2.xml`
+- `2-1004UAD.xml`
+- `content.txt`
 
-- Clean:
-
-```bash
-./fileParser.sh clean
-```
-
-## Output
-
-After running the parser, all extracted files are saved in the ./output/ folder.
-
-### Example
-
-Given `sample.env` contains the following files:
-
-- homer-simpson.jpg
-- 0-INC2.xml
-- 1004UADMISMOUAD2.6GSE.xml
-- 1-REO2.xml
-- 2-1004UAD.xml
-- content.txt
-
-The output structure would be:
+Then the parser will generate:
 
 ```
 output/
@@ -69,8 +48,55 @@ output/
 |   content.txt
 ```
 
+These files are reconstructed exactly as they were embedded, with correct extensions and filenames.
+
+---
+
+## Project Structure
+
+- `FileParser.java` – Main entry point: handles argument validation and orchestration.
+- `Utils.java` – Core logic for parsing byte headers, extracting metadata, and saving files.
+- `Constants.java` – Byte markers, file structure constants, and format configuration.
+- `exceptions/` – Custom exception classes for structured error handling.
+- `utils/ErrorMessageEnum.java` – Centralized, consistent error message definitions.
+- `fileParser.sh` – Shell script to build, run, and clean the project.
+
+---
+
+## How to Use
+
+Clone the repository and open a terminal in the root directory.
+
+### Commands
+
+- Build the project:
+
+```bash
+./fileParser.sh build
+```
+
+- Run the parser::
+
+```bash
+./fileParser.sh run sample.env
+```
+
+- Clean all outputs:
+
+```bash
+./fileParser.sh clean
+```
+
 ## Live Demo
 
-This project runs locally as a console application and does not include a hosted or web-based demo.
+This is a terminal-based project and does not include a web interface or hosted demo.
+However, it can be tested locally in seconds using a `sample.env` file:
 
-To try it out, clone the repository and follow the [Usage](#-how-to-use) instructions.
+```bash
+./fileParser.sh run test/resources/sample.env
+```
+
+## Requirements
+
+- Java 17+
+- Unix-like environment with bash and find (Linux/macOS or WSL)
